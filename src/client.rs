@@ -5,8 +5,7 @@ use std::{
 
 use futures_util::Future;
 use http::{Request, Response};
-use tonic::body::BoxBody;
-use tower_service::Service;
+use tonic::{body::BoxBody, client::GrpcService};
 
 use crate::{call::call, Error, ResponseBody};
 
@@ -23,12 +22,12 @@ impl Client {
     }
 }
 
-impl Service<Request<BoxBody>> for Client {
-    type Response = Response<ResponseBody>;
+impl GrpcService<BoxBody> for Client {
+    type ResponseBody = ResponseBody;
 
     type Error = Error;
 
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+    type Future = Pin<Box<dyn Future<Output = Result<Response<Self::ResponseBody>, Self::Error>>>>;
 
     fn poll_ready(&mut self, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         Poll::Ready(Ok(()))
